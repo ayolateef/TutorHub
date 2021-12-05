@@ -1,26 +1,23 @@
 [
-    {
-      "_id": "5d713995b721c3bb38c1f5d0",
-      "user": "5d7a514b5d2c12c7449be045",
-      "name": "Primary Category",
-      "description": "This category is for student from Primary 1 to Primary 6",
-      "website": "https://pricategory.com",
-      "email": "enroll@pricategory.com"
-    },
-    {
-      "_id": "5d713995b721c3bb38c1f5d0",
-      "user": "5d7a514b5d2c12c7449be045",
-      "name":"JSS Category",
-      "description": "This category is for students from JSS 1 to JSS 3",
-      "website": "https://juniorcategory.com",
-      "email": "enroll@jsscategory.com"
-    },
-    {
-      "_id": "5d713995b721c3bb38c1f5d0",
-      "user": "5d7a514b5d2c12c7449be045",
-      "name":"SSS Category",
-      "description": "This category is for students from SSS 1 to SSS 3",
-      "website": "https://seniorcategory.com",
-      "email": "enroll@ssscategory.com"
-    }
+  {
+    "_id": "5d713995b721c3bb38c1f5d0",
+    "name": "Primary Category",
+    "description": "This category is for student from Primary 1 to Primary 6",
+    "website": "https://pricategory.com",
+    "email": "enroll@pricategory.com"
+  },
+  {
+    "_id": "5d713995b721c3bb38c1f5d0",
+    "name": "JSS Category",
+    "description": "This category is for students from JSS 1 to JSS 3",
+    "website": "https://juniorcategory.com",
+    "email": "enroll@jsscategory.com"
+  },
+  {
+    "_id": "5d713995b721c3bb38c1f5d0",
+    "name": "SSS Category",
+    "description": "This category is for students from SSS 1 to SSS 3",
+    "website": "https://seniorcategory.com",
+    "email": "enroll@ssscategory.com"
+  }
 ]

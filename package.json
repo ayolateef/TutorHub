@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "NODE_ENV=production node server",
-    "dev": "nodemon server"
+    "dev": "nodemon server",
+    "test": "jest --watchAll"
   },
   "author": "Ayo Lateef",
   "license": "MIT",
@@ -19,6 +20,7 @@
     "slugify": "^1.6.3"
   },
   "devDependencies": {
+    "jest": "^27.4.3",
     "nodemon": "^2.0.15"
   }
 }

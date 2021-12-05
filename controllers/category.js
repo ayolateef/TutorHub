@@ -20,17 +20,22 @@ exports.getCategories = asyncHandler(async (req, res, next) => {
 // @route   GET/api/v1/categories/:id
 // @access  Public
 
-exports.getCategory = asyncHandler(async (req, res, next) => {
- 
+exports.getCategory = async (req, res, next) => {
+  try {
     const category = await Category.findById(req.params.id);
 
+    //null
     if (!category) {
       return next(
         new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
       );
     }
     res.status(200).json({ success: true, data: category });
-});
+
+  } catch (error) {
+    next(error);
+  }
+  };  
 
 // @desc    POST category
 // @route   GET/api/v1/categories

@@ -9,6 +9,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === "CastError") {
     const message = `Resourse not found with id of ${err.value}`;
     error = new ErrorResponse(message, 404);
+    // error.message = 
   }
 
   //Mongoose duplicate key
@@ -23,7 +24,7 @@ const errorHandler = (err, req, res, next) => {
     error = new ErrorResponse(message, 400);
   }
 
-  res
+  return res
     .status(err.statusCode || 500)
     .json({ success: false, error: error.message || "Server Error" });
 };

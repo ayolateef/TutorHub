@@ -1,6 +1,6 @@
 const mongoose = require ('mongoose');
 const slugify = require("slugify");
-const geocoder = require('../utils/geocoder');
+
 
    const CategorySchema = new mongoose.Schema({ 
        name: {
@@ -36,19 +36,10 @@ const geocoder = require('../utils/geocoder');
         type: String,
         default: "no-photo.jpg",
       },
-      createdAt: {
-        type: Date,
-        default: Date.now,
-      },
-      updatedAt: {
-        type: Boolean,
-        default: false,
-      }
+     
     },
-      {
-      toJSON:{virtuals: true},
-      toObject:{virtuals:true }
-    });
+   {timestamps: true}
+    );
 
     // Create category slug from the name and save
     CategorySchema.pre('save', function(next) {
