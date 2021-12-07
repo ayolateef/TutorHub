@@ -25,18 +25,10 @@ const slugify = require("slugify");
           "Please use a valid URL with Https",
         ],
       },
-      email: {
-        type: String,
-        match: [
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-          "Please add a valid email",
-        ],
-      },
        photo: {
         type: String,
         default: "no-photo.jpg",
       },
-     
     },
    {timestamps: true}
     );

@@ -31,10 +31,11 @@ exports.getCategory = async (req, res, next) => {
       );
     }
     res.status(200).json({ success: true, data: category });
-
-  } catch (error) {
+  } 
+  catch (error) {
     next(error);
   }
+
   };  
 
 // @desc    POST category

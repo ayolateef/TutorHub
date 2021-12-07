@@ -2,6 +2,8 @@ const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require('colors');
+var cookieParser = require('cookie-parser')
+const Joi = require('joi');
 const errorHandler = require('./middleware/error')
 
 const connectDB = require("./config/db");
@@ -15,12 +17,17 @@ connectDB();
 
 //Route files
 const category= require('./routes/category');
+const auth= require('./routes/auth');
 
 
 const app = express();
 
 //Body Parser
 app.use(express.json());
+
+//cookie parser
+app.use(cookieParser())
+
 
 // Dev logging middleware
 if (process.env.NODE_ENV === "development") {
@@ -29,6 +36,7 @@ if (process.env.NODE_ENV === "development") {
 
 //Mount routers
 app.use('/api/v1/category', category);
+app.use('/api/v1/auth', auth);
 
 app.use(errorHandler);
 
