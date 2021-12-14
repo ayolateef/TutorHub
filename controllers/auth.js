@@ -1,82 +1,121 @@
-const ErrorResponse = require("../utils/errorResponse");
+const Admin = require("../models/Admin");
+const { validateLogin, validateSuperAdminLogin} = require("../validation/authValidation");
 const asyncHandler = require("../middleware/async");
-const User = require("../models/User");
+const ErrorResponse = require("../utils/errorResponse");
+const Tutor = require("../models/Tutor");
+const SuperAdmin = require("../models/SuperAdmin");
+const Student = require("../models/Student");
 
-// @desc   Register User
-// @route   POST/api/v1/auth/register
-// @access  Public
-exports.register = asyncHandler(async (req, res, next) => {
-  const { username, name, email, password, role } = req.body;
+// const joi = {
+//     error: {
+//         details: [
+//             {
+//                 message: "email is required"
+//             }
+//         ]
+//     }
+// }
 
-  //create user
-  const user = await User.create({
-    username,
-    name,
-    email,
-    password,
-    role,
-  });
+// {
+//     email: "ajaomahmud@gmail.com",
+//     password: "123456"
+// }
+exports.superadminLogin = asyncHandler(async (req, res, next) => {
+  // 1. validate request
+  const { error } = validateSuperAdminLogin(req.body);
+  if (error) return res.status(400).json(error.details[0].message);
 
-  // Create token
-    sendTokenResponse(user, 200, res);
+  // 2. check if the superadmin exists in the database
+  const superadmin = await SuperAdmin.findOne({
+    username: req.body.username,
+  }).select("+password");
+  if (!superadmin)
+    return next(new ErrorResponse("Invalid username or password", 400));
 
+  //3. check if the superadmin password is correct
+  const isPassword = await superadmin.matchPassword(req.body.password);
+  if (!isPassword)
+    return next(new ErrorResponse("Invalid username or password", 400));
 
-//  const token = user.getSignedJwtToken();
-//    res.status(200).json({ success: true, token });
+  //4. Generate a token for the super admin
+  const token = await superadmin.getSignedJwtToken();
+  return res.status(200).json({ success: true, data: token });
 });
 
-// @desc   login User
-// @route   POST/api/v1/auth/login
-// @access  Public
-exports.login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+exports.adminLogin = asyncHandler(async (req, res, next) => {
+  // 1. validate request
+  const { error } = validateLogin(req.body);
+  if (error) return res.status(400).json(error.details[0].message);
 
-  // Validate email & password
-  if (!email || !password) {
-    return next(new ErrorResponse("Please provide an email and password", 400));
-  }
-  // Check for the user
-  const user = await User.findOne({ email }).select("+password");
+  // 2. check if the admin exists in the database
+  const admin = await Admin.findOne({ email: req.body.email }).select(
+    "+password"
+  );
+  if (!admin) return next(new ErrorResponse("Invalid email or password", 400));
 
-  if (!user) {
-    return next(new ErrorResponse("Invalid credentials", 401));
-  }
-  // Check if password matches
-  const isMatch = await user.matchPassword(password);
-  if (!isMatch) {
-    return next(new ErrorResponse("Invalid credentials", 401));
-  }
+  //3. check if the admin password is correct
+  const isPassword = await admin.matchPassword(req.body.password);
+  if (!isPassword)
+    return next(new ErrorResponse("Invalid email or password", 400));
 
-  //If its matches keep going and create a token
-  sendTokenResponse(user, 200, res);
+  //4. check if the admin account has been deactivated
+  if (!admin.active)
+    return next(
+      new ErrorResponse("Account deactivated, permission denied", 403)
+    );
+
+  //5. Generate a token for the admin
+  const token = await admin.getSignedJwtToken();
+  return res.status(200).json({ success: true, data: token });
 });
 
-//Get token model, create cookie and send response
-const sendTokenResponse = (user, statusCode, res) => {
-  //Create token
-  const token = user.getSignedJwtToken();
+exports.tutorLogin = asyncHandler(async (req, res, next) => {
+  // 1. validate request
+  const { error } = validateLogin(req.body);
+  if (error) return res.status(400).json(error.details[0].message);
 
-  const options = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-  };
+  // 2. check if the tutor exists in the database
+  const tutor = await Tutor.findOne({ email: req.body.email }).select(
+    "+password"
+  );
 
-  if (process.env.NODE_ENV === "production") {
-    options.secure = true;
-  }
-  res.status(statusCode).cookie("token", token, options).json({
-    success: true,
-    token,
-  });
-};
+  if (!tutor) return next(new ErrorResponse("Invalid email or password", 400));
 
-// @desc   Get current logged in user
-// @route   get/api/v1/auth/me
-// @access  Private
-exports.getMe = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  //3. check if the admin password is correct
+  const isPassword = await tutor.matchPassword(req.body.password);
+  if (!isPassword)
+    return next(new ErrorResponse("Invalid email or password", 400));
 
-  res.status(200).json({ success: true, data: user });
+  //4. check if the tutor account has been deactivated
+  if (!tutor.active)
+    return next(
+      new ErrorResponse("Account deactivated, permission denied", 403)
+    );
+
+  //5. Generate a token for the tutor
+  const token = await tutor.getSignedJwtToken();
+  return res.status(200).json({ success: true, data: token });
+});
+
+exports.studentLogin = asyncHandler(async (req, res, next) => {
+  // 1. validate request
+  const { error } = validateLogin(req.body);
+  if (error) return res.status(400).json(error.details[0].message);
+
+  // 2. check if the tutor exists in the database
+  // const superadmin = await SuperAdmin.findOne({ username }).select("+password");=
+  const student = await Student.findOne({ email: req.body.email }).select(
+    "+password"
+  );
+  if (!student)
+    return next(new ErrorResponse("Invalid email or password", 400));
+
+  //3. check if the student password is correct
+  const isPassword = await student.matchPassword(req.body.password);
+  if (!isPassword)
+    return next(new ErrorResponse("Invalid email or password", 400));
+
+  //4. Generate a token for the student
+  const token = await student.getSignedJwtToken();
+  return res.status(200).json({ success: true, data: token });
 });

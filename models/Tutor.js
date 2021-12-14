@@ -3,13 +3,8 @@ const Joi = require("joi");
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
 
-const UserSchema = new mongoose.Schema(
+const TutorSchema = new mongoose.Schema(
   {
-    username: {
-      type: String,
-      required: [true, "Please type in a username"],
-      unique: true,
-    },
     name: {
       type: String,
       required: [true, "Please add a name"],
@@ -24,9 +19,9 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["superAdmin", "Admin", "Tutor", "Student"],
-      default: "superAdmin",
+      default: "Tutor",
     },
+    active: { type: Boolean, defaultValue: true },
     password: {
       type: String,
       required: [true, "Please password required"],
@@ -40,32 +35,44 @@ const UserSchema = new mongoose.Schema(
   {
     timestamps: true,
   },
-  function validateUser(user) {
+  {
+    subject: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Subject',
+      required: true
+  },
+  category: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Category',
+    required: true
+},
+  },
+  function validateTutor(tutor) {
     const schema = {
-      username: Joi.string().min(5).max(50).required(),
+     
       name: Joi.string().min(5).max(50).required(),
       email: Joi.string().min(5).max(255).required().email(),
       password: Joi.string().min(5).max(255).required(),
     };
-    return Joi.validate(user, schema);
+    return Joi.validate(tutor, schema);
   }
 );
 
 // Encrypt password using bcrypt
-UserSchema.pre("save", async function (next) {
+TutorSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
 // Sign JWT and return
-UserSchema.methods.getSignedJwtToken = function() {
+TutorSchema.methods.getSignedJwtToken = function() {
     return jwt.sign({id: this._id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRE
     });
 };
-//Match user entered password to hashed password in database
-UserSchema.methods.matchPassword = async function(enteredPassword) {
+//Match tutor entered password to hashed password in database
+TutorSchema.methods.matchPassword = async function(enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
  
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model("Tutor", TutorSchema);
