@@ -41,6 +41,14 @@ exports.getCategory = async (req, res, next) => {
 // @access  Public
 
 exports.createCategories = asyncHandler(async (req, res, next) => {
+  // Add users to req.body
+  req.body.superadmin = req.superadmin.id;
+  req.body.admin = req.admin.id;
+  req.body.tutor = req.tutor.id;
+  req.body.students = req.students.id;
+  
+
+
   const category = await Category.create(req.body);
   res.status(201).json({ success: true, data: category });
 });
