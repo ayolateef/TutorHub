@@ -2,7 +2,7 @@ const express = require("express");
 const {
   getCategories,
   getCategory,
-  createCategories,
+  createCategory,
   updateCategory,
   deleteCategory,
 } = require("../controllers/categorys");
@@ -17,7 +17,7 @@ const router = express.Router();
 // Rer-route into other resource routers
 router.use('/:catergoryId/subjects', subjectRouter);
 
-router.route("/").get(getCategories).post(createCategories);
+router.route("/").get(getCategories).post(createCategory);
 
 router.route("/:id").get(getCategory).put(updateCategory).delete(deleteCategory);
 

@@ -7,11 +7,11 @@ const Student = require('../models/Student');
 // @access  Public
 exports.register = asyncHandler(async (req, res, next) => {
     // register 
-    const {name, email, password, role} = req.body; 
+    const {name, email, password} = req.body; 
 
     // Create student
 const student = await Student.create({
-    name, email, password, role
+    name, email, password
 });
     res.status(200).json({
         success: true,

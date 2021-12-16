@@ -33,6 +33,26 @@ const CategorySchema = new mongoose.Schema(
     ref: 'Subject',
     required: true
     },
+    superadmin: {
+      type: mongoose.Schema.ObjectId,
+    ref: 'SuperAdmin',
+    required: true
+    },
+    admin: {
+      type: mongoose.Schema.ObjectId,
+    ref: 'Admin',
+    required: true
+    },
+    tutor: {
+      type: mongoose.Schema.ObjectId,
+    ref: 'Tutor',
+    required: true
+    },
+    students: {
+      type: mongoose.Schema.ObjectId,
+    ref: 'Student',
+    required: true
+    },
   }, 
   { timestamps: true },
   {toJSON: {virtuals: true},

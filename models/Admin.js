@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
 const bcrypt = require("bcryptjs");
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
 const AdminSchema = new mongoose.Schema(
@@ -48,6 +49,9 @@ const AdminSchema = new mongoose.Schema(
 
 // Encrypt password using bcrypt
 AdminSchema.pre("save", async function (next) {
+  if (!this.isModified('password')) {
+    next();
+  }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
@@ -61,6 +65,24 @@ AdminSchema.methods.getSignedJwtToken = function() {
 //Match user entered password to hashed password in database
 AdminSchema.methods.matchPassword = async function(enteredPassword) {
     return bcrypt.compare(enteredPassword, this.password);
+};
+
+
+//Generate hash password token
+AdminSchema.methods.getResetPasswordToken = function() {
+  // Genrate token
+  const resetToken = crypto.randomBytes(20).toString('hex');
+
+  //Hash token and set to resetPasswordToken field
+  this.resetPasswordToken = crypto
+  .createHash('sha256')
+  .update(resetToken)
+  .digest('hex');
+
+  // set expire
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
  
 module.exports = mongoose.model("Admin", AdminSchema);

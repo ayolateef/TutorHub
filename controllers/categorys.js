@@ -40,7 +40,7 @@ exports.getCategory = async (req, res, next) => {
 // @route   GET/api/v1/categories
 // @access  Public
 
-exports.createCategories = asyncHandler(async (req, res, next) => {
+exports.createCategory = asyncHandler(async (req, res, next) => {
   // Add users to req.body
   req.body.superadmin = req.superadmin.id;
   req.body.admin = req.admin.id;
@@ -69,6 +69,7 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // 
   res.status(200).json({ success: true, data: category });
 });
 
@@ -77,14 +78,13 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
 // @access  Private
 
 exports.deleteCategory = asyncHandler(async (req, res, next) => {
-  const category = await Category.findById(req.params.id);
+  const category = await Category.deleteOne({_id: req.params.id});
 
   if (!category) {
     return next(
       new ErrorResponse(`Category not found with id of ${req.params.id}`, 404)
     );
   }
-  category.remove();
 
   res.status(200).json({ success: true, data: {} });
 });
