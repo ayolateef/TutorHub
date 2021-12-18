@@ -1,8 +1,6 @@
 const Admin = require("../models/Admin");
-const {
-  validateLogin,
-  validateSuperAdminLogin,
-} = require("../validation/authValidation");
+const {validateLogin, validateSuperAdminLogin} = require("../validation/authValidation");
+const sendTokenResponse = require('../middleware/tokenres');
 const asyncHandler = require("../middleware/async");
 const ErrorResponse = require("../utils/errorResponse");
 const Tutor = require("../models/Tutor");
@@ -18,7 +16,7 @@ exports.superadminLogin = asyncHandler(async (req, res, next) => {
 
   // 2. check if the superadmin exists in the database
   const superadmin = await SuperAdmin.findOne({
-    username: req.body.username,
+    username: req.body.username
   }).select("password");
   if (!superadmin)
     return next(new ErrorResponse("Invalid username or password", 400));
@@ -29,9 +27,9 @@ exports.superadminLogin = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Invalid username or password", 400));
 
   //4. Generate a token for the super admin
-  const token = await superadmin.getSignedJwtToken();
-  return res.status(200).json({ success: true, data: token });
+  sendTokenResponse(superadmin, 200, res);
 });
+
 // @forgot password superadmin
 exports.forgotSuperadminPassword = asyncHandler(async (req, res, next) => {
   const superadmin = await SuperAdmin.findOne({ username: req.body.username });
@@ -101,6 +99,37 @@ exports.resetSuperadminPassword = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: superadmin });
 });
 
+// Update superadmin details
+// PUT /api/v1/auth/updatedSuperadmindetails
+// Private
+exports.updateSuperadminDetails = asyncHandler(async (req, res, next) => {
+  const fieldsToUpdate = {
+    username: req.body.username,
+    email: req.body.email
+  }
+
+  const superadmin = await SuperAdmin.findByIdAndUpdate(req.superadmin.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    success: true,
+    data: superadmin
+  });
+});
+// Get current logged in user
+//@ riute POST/api/v1/auth/me
+// @access Private
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const superadmin = await Superadmin.findById(req.user.id);
+
+  res.status(200).json({
+    success: true,
+    data: superadmin
+  });
+});
+
 // Admin Auth
 exports.adminLogin = asyncHandler(async (req, res, next) => {
   // 1. validate request
@@ -125,8 +154,7 @@ exports.adminLogin = asyncHandler(async (req, res, next) => {
     );
 
   //5. Generate a token for the admin
-  const token = await admin.getSignedJwtToken();
-  return res.status(200).json({ success: true, data: token });
+  sendTokenResponse(admin, 200, res);
 });
 
 // Admin forgot password
@@ -167,7 +195,7 @@ exports.forgotadminPassword = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: admin,
+    data: admin
   });
 });
 
@@ -198,6 +226,37 @@ exports.resetAdminPassword = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: admin });
 });
 
+// Update Admin details
+// PUT /api/v1/auth/updateAdmindetails
+// Private
+exports.updateAdminDetails = asyncHandler(async (req, res, next) => {
+  const fieldsToUpdate = {
+    name: req.body.name,
+    email: req.body.email
+  }
+
+  const admin = await Admin.findByIdAndUpdate(req.admin.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    success: true,
+    data: admin
+  });
+});
+// Get current logged in user
+//@ riute POST/api/v1/auth/me
+// @access Private
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const admin = await Admin.findById(req.admin.id);
+
+  res.status(200).json({
+    success: true,
+    data: admin
+  });
+});
+
 // Tutor Auth 
 exports.tutorLogin = asyncHandler(async (req, res, next) => {
   // 1. validate request
@@ -223,8 +282,7 @@ exports.tutorLogin = asyncHandler(async (req, res, next) => {
     );
 
   //5. Generate a token for the tutor
-  const token = await tutor.getSignedJwtToken();
-  return res.status(200).json({ success: true, data: token });
+  sendTokenResponse(tutor, 200, res);
 });
 
 // tutor forgot password
@@ -296,6 +354,37 @@ exports.resetTutorPassword = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: tutor});
 });
 
+// Update tutor details
+// PUT /api/v1/auth/updateTutordetails
+// Private 
+exports.updateTutorDetails = asyncHandler(async (req, res, next) => {
+  const fieldsToUpdate = {
+    name: req.body.name,
+    email: req.body.email
+  }
+
+  const tutor = await Tutor.findByIdAndUpdate(req.tutor.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    success: true,
+    data: tutor
+  });
+});
+// Get current logged in user
+//@ riute POST/api/v1/auth/me
+// @access Private
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const tutor = await Tutor.findById(req.tutor.id);
+
+  res.status(200).json({
+    success: true,
+    data: tutor
+  });
+});
+
 // STUDENT AUTH
 exports.studentLogin = asyncHandler(async (req, res, next) => {
   // 1. validate request
@@ -316,8 +405,7 @@ exports.studentLogin = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Invalid email or password", 400));
 
   //4. Generate a token for the student
-  const token = await student.getSignedJwtToken();
-  return res.status(200).json({ success: true, data: token });
+  sendTokenResponse(student, 200, res);
 });
 
 // Student forgot password
@@ -387,4 +475,35 @@ exports.resetStudentPassword = asyncHandler(async (req, res, next) => {
   await student.save();
 
   res.status(200).json({ success: true, data: student });
+});
+
+// Update student details
+// PUT /api/v1/auth/updatedStudentdetails
+// Private
+exports.updateStudentDetails = asyncHandler(async (req, res, next) => {
+  const fieldsToUpdate = {
+    name: req.body.name,
+    email: req.body.email
+  }
+
+  const student = await Student.findByIdAndUpdate(req.student.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    success: true,
+    data: student
+  });
+});
+// Get current logged in user
+//@ riute POST/api/v1/auth/me
+// @access Private
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const student = await Student.findById(req.student.id);
+
+  res.status(200).json({
+    success: true,
+    data: student
+  });
 });

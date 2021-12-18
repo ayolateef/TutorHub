@@ -4,8 +4,11 @@ const {getTutors,getTutor, createTutor, addTutor} = require('../controllers/tuto
 
 const router = express.Router();
 
-router.route('/').get(getTutors).post(createTutor);
+const {protect, authorize} = require('../middleware/auth');
 
-router.route("/:id").get(getTutor).put(addTutor);
+
+router.route('/').get(getTutors).post(protect, authorize('superadmin', 'admin'),createTutor);
+
+router.route("/:id").get(getTutor).put(protect,authorize('superadmin', 'admin'), addTutor);
 
 module.exports = router;

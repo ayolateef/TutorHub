@@ -20,7 +20,7 @@ exports.createAdmin = asyncHandler(async(req, res, next) => {
 
 // @desc    GET all Admins
 // @route   GET/api/v1/admins
-// @access  Public
+// @access  Private/superadmin
 exports.getAdmins = asyncHandler(async (req, res, next) => {
 
   const admins = await Admin.find();
@@ -31,8 +31,8 @@ exports.getAdmins = asyncHandler(async (req, res, next) => {
 });
 
   // @desc    GET all  admins
-// @route   GET/api/v1/superadmin
-// @access  Public
+// @route   GET/api/v1/admins
+// @access  Private/superadmin
 
 exports.getAllAdmins = asyncHandler(async (req, res, next) => {
   let query;
@@ -57,7 +57,7 @@ exports.getAllAdmins = asyncHandler(async (req, res, next) => {
 
 //  @desc    Get single admin
 //   @route   GET /api/v1/admin/:id
-//   @access  private/admin
+//   @access  private/superadmin
  
 exports.getAdmin = asyncHandler(async (req, res, next) => {
     const admin = await Admin.findById(req.params.id).populate({
@@ -76,4 +76,20 @@ exports.getAdmin = asyncHandler(async (req, res, next) => {
         success: true,
         data: admin
     });
+});
+
+// @desc   Update Admins
+// @route   PUT/api/v1/auth/admin/:id
+// @access  Private/superadmin
+exports.updateAdmin = asyncHandler(async (req, res, next) => {
+
+  const admins = await Admin.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true
+  });
+
+ res
+    .status(200)
+    .json({ success: true, count: admins.length, data: admins });
+
 });

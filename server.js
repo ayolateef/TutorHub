@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require('colors');
-var cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const Joi = require('joi');
 const errorHandler = require('./middleware/error')
 
@@ -30,7 +30,7 @@ const app = express();
 app.use(express.json());
 
 //cookie parser
-app.use(cookieParser())
+app.use(cookieParser());
 
 // Dev logging middleware
 if (process.env.NODE_ENV === "development") {
