@@ -34,7 +34,7 @@ const {protect} = require('../middleware/auth')
 router.post('/superadmin',superadminLogin);
 router.post('/admin', adminLogin);
 router.post('/tutor', tutorLogin);
-router.post('/student', protect, studentLogin);
+ router.post('/student', protect, studentLogin);
 
 router.post('/forgotSuperadminPassword', forgotSuperadminPassword);
 router.post('/forgotadminPassword', forgotadminPassword);

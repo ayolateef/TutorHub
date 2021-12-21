@@ -9,6 +9,7 @@ const {
 
 //Include resource from router
 const subjectRouter = require('./subjects');
+const reviewRouter = require('./review');
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ const router = express.Router();
  
 // Rer-route into other resource routers
 router.use('/:catergoryId/subjects', subjectRouter);
+router.use('/:catergoryId/review', reviewRouter);
 
 router.route("/").get(getCategories).post(protect, authorize('superadmin', 'admin', 'tutor', 'student'),createCategory);
 

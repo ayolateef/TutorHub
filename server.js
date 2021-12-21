@@ -22,6 +22,7 @@ const admin= require('./routes/admin');
 const auth = require('./routes/auth');
 const tutor = require('./routes/tutor');
 const student = require('./routes/student');
+const review = require('./routes/review');
 
 
 const app = express();
@@ -51,6 +52,7 @@ app.use('/api/v1/category', category);
  app.use('/api/v1/auth', auth);
  app.use('/api/v1/tutor', tutor);
  app.use('/api/v1/student', student);
+ app.use('/api/v1/review', review);
 
 app.use(errorHandler);
 

@@ -2,6 +2,8 @@ const express = require("express");
 const {
   getSubjects,getSubject,addSubject,updateSubject,deleteSubject} = require('../controllers/subjects');
 
+  const Subject = require('../models/Subject');
+
   const router = express.Router({mergeParams: true});
 
   const {protect, authorize } = require('../middleware/auth');

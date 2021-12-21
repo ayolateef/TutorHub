@@ -3,7 +3,7 @@ const asyncHandler = require("./async");
 const ErrorResponse = require("../utils/errorResponse");
 const SuperAdmin = require("../models/SuperAdmin");
 
-// Protect routes
+//Protect routes
 exports.protect = asyncHandler(async (req, res, next) => {
   let token;
 

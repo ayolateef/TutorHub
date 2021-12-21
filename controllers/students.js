@@ -53,5 +53,3 @@ exports.getStudents = asyncHandler(async (req, res, next) => {
           data: student
       });
   });
-
-  
