@@ -1,5 +1,5 @@
 const express = require('express');
-const { createSuperadmin,login} = require('../controllers/superadmin');
+const { createSuperadmin} = require('../controllers/superadmin');
 
 const router = express.Router();
 

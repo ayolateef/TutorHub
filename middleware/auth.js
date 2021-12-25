@@ -2,20 +2,24 @@ const jwt = require("jsonwebtoken");
 const asyncHandler = require("./async");
 const ErrorResponse = require("../utils/errorResponse");
 const SuperAdmin = require("../models/SuperAdmin");
+const Admin = require("../models/Admin");
+const Tutor = require("../models/Tutor");
+const Student = require("../models/Student");
 
 //Protect routes
 exports.protect = asyncHandler(async (req, res, next) => {
   let token;
 
+  //checking for the authorization headers
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
+    // set token from bearer token in headers
     token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.token) {
+    token = req.cookies.token;
   }
-  // else if (req.cookies.token) {
-  //   token = req.cokies.token
-  // }
   //Make sure token exists
   if (!token) {
     return next(new ErrorResponse("Not authorize to access this routes", 401));
@@ -40,11 +44,34 @@ exports.protect = asyncHandler(async (req, res, next) => {
 //Grant access to specific roles
 exports.authorize = (...roles) => {
   return (req, res, next) => {
-  
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(req.superadmin.role )) {
       return next(
         new ErrorResponse(
-          `Role ${req.user.role} is not authorized to access this route`,
+          `Role ${req.superadmin.role} is not authorized to access this route`,
+          403
+        )
+      );
+    }
+    else if (!roles.includes(req.admin.role )) {
+      return next(
+        new ErrorResponse(
+          `Role ${req.admin.role} is not authorized to access this route`,
+          403
+        )
+      );
+    }
+    else if (!roles.includes(req.tutor.role )) {
+      return next(
+        new ErrorResponse(
+          `Role ${req.tutor.role} is not authorized to access this route`,
+          403
+        )
+      );
+    }
+    else if (!roles.includes(req.student.role )){
+      return next(
+        new ErrorResponse(
+          `Role ${req.student.role} is not authorized to access this route`,
           403
         )
       );

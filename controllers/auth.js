@@ -30,12 +30,25 @@ exports.superadminLogin = asyncHandler(async (req, res, next) => {
   sendTokenResponse(superadmin, 200, res);
 });
 
+// Superadmin Logout
+exports.logoutSuperadmin = asyncHandler(async (req, res, next) => {
+res.cookie('token', 'none',{
+  expires: new Date(Date.now() + 10 * 1000),
+  httpOnly: true
+});
+
+res.status(200).json({
+  success: true,
+  data: {}
+});
+});
+
 // @forgot password superadmin
 exports.forgotSuperadminPassword = asyncHandler(async (req, res, next) => {
   const superadmin = await SuperAdmin.findOne({ username: req.body.username });
 
   if (!superadmin) {
-    return next(new ErrorResponse("There is superadmin with username", 404));
+    return next(new ErrorResponse("There is no superadmin with this username", 404));
   }
   //Get reset token
   const resetToken = superadmin.getResetPasswordToken();
@@ -118,11 +131,11 @@ exports.updateSuperadminDetails = asyncHandler(async (req, res, next) => {
     data: superadmin
   });
 });
-// Get current logged in user
+// Get current logged in superadmin
 //@ riute POST/api/v1/auth/me
 // @access Private
-exports.getMe = asyncHandler(async (req, res, next) => {
-  const superadmin = await Superadmin.findById(req.user.id);
+exports.getMeSuperadmin = asyncHandler(async (req, res, next) => {
+  const superadmin = await SuperAdmin.findById(req.superadmin.id);
 
   res.status(200).json({
     success: true,
@@ -157,7 +170,19 @@ exports.adminLogin = asyncHandler(async (req, res, next) => {
   sendTokenResponse(admin, 200, res);
 });
 
-// Admin forgot password
+// Admin Logout
+exports.logoutAdmin = asyncHandler(async (req, res, next) => {
+  res.cookie('token', 'none',{
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+  res.status(200).json({
+    success: true,
+    data: {}
+  });
+});
+
+// Admn forgot password
 exports.forgotadminPassword = asyncHandler(async (req, res, next) => {
   const admin = await Admin.findOne({ email: req.body.email });
 
@@ -245,10 +270,10 @@ exports.updateAdminDetails = asyncHandler(async (req, res, next) => {
     data: admin
   });
 });
-// Get current logged in user
+// Get current logged in admin
 //@ riute POST/api/v1/auth/me
 // @access Private
-exports.getMe = asyncHandler(async (req, res, next) => {
+exports.getMeAdmin = asyncHandler(async (req, res, next) => {
   const admin = await Admin.findById(req.admin.id);
 
   res.status(200).json({
@@ -285,6 +310,18 @@ exports.tutorLogin = asyncHandler(async (req, res, next) => {
   sendTokenResponse(tutor, 200, res);
 });
 
+// Tutor Logout
+exports.logoutTutor = asyncHandler(async (req, res, next) => {
+  res.cookie('token', 'none',{
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+  
+  res.status(200).json({
+    success: true,
+    data:{}
+  });
+  });
 // tutor forgot password
 exports.forgotTutorPassword = asyncHandler(async (req, res, next) => {
   const tutor = await Tutor.findOne({ email: req.body.email });
@@ -376,7 +413,7 @@ exports.updateTutorDetails = asyncHandler(async (req, res, next) => {
 // Get current logged in user
 //@ riute POST/api/v1/auth/me
 // @access Private
-exports.getMe = asyncHandler(async (req, res, next) => {
+exports.getMeTutor = asyncHandler(async (req, res, next) => {
   const tutor = await Tutor.findById(req.tutor.id);
 
   res.status(200).json({
@@ -391,7 +428,7 @@ exports.studentLogin = asyncHandler(async (req, res, next) => {
   const { error } = validateLogin(req.body);
   if (error) return res.status(400).json(error.details[0].message);
 
-  // 2. check if the tutor exists in the database
+  // 2. check if the student exists in the database
 
   const student = await Student.findOne({ email: req.body.email }).select(
     "password"
@@ -406,6 +443,18 @@ exports.studentLogin = asyncHandler(async (req, res, next) => {
 
   //4. Generate a token for the student
   sendTokenResponse(student, 200, res);
+});
+
+// Student Logout
+exports.logoutStudent = asyncHandler(async (req, res, next) => {
+  res.cookie('token', 'none',{
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+  res.status(200).json({
+    success: true,
+    data: {}
+  });
 });
 
 // Student forgot password
@@ -496,10 +545,10 @@ exports.updateStudentDetails = asyncHandler(async (req, res, next) => {
     data: student
   });
 });
-// Get current logged in user
-//@ riute POST/api/v1/auth/me
+// Get current logged in student
+//@ route POST/api/v1/auth/me
 // @access Private
-exports.getMe = asyncHandler(async (req, res, next) => {
+exports.getMeStudent = asyncHandler(async (req, res, next) => {
   const student = await Student.findById(req.student.id);
 
   res.status(200).json({

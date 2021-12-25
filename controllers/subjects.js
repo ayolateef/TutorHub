@@ -56,13 +56,9 @@ exports.getSubject = asyncHandler(async (req, res, next) => {
 // @access  Private
 
 exports.addSubject = asyncHandler(async (req, res, next) => {
-  // Add users to req.body
-
-  req.body.tutor = req.tutor.id;
-  req.body.students = req.students.id;
-  // Get the category id submit to tve body
+    // Get the category id submit to tve body
   req.body.category = req.params.categoryId;
-
+  
   const category = await Category.findById(req.params.categoryId);
 
   // check if it exist
@@ -70,16 +66,6 @@ exports.addSubject = asyncHandler(async (req, res, next) => {
     return next(
       new ErrorResponse(`No category with the id of ${req.params.categoryId}`),
       404
-    );
-  }
-
-  // Make sure user is category  owner
-  if (category.students.toString() !== req.students.id && req.students.role !== "admin") {
-    return next(
-      new ErrorResponse(
-        `Student ${req.students.id} is not authorize to add a subject to this category ${category._id}`,
-        401
-      )
     );
   }
   // create a new subject

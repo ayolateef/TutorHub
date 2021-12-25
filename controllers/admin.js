@@ -37,7 +37,7 @@ exports.getAdmins = asyncHandler(async (req, res, next) => {
 exports.getAllAdmins = asyncHandler(async (req, res, next) => {
   let query;
   // check if the admin exist
-  if (req.params.AdminId) {
+  if (req.params.adminId) {
     query = Admin.find({ category: req.params.adminId });
   } else {
     query = Admin.find().populate({

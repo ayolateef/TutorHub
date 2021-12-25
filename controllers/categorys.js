@@ -27,7 +27,7 @@ exports.getCategory = async (req, res, next) => {
     //null
     if (!category) {
       return next(
-        new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+        new ErrorResponse(`Category not found with id of ${req.params.id}`, 404)
       );
     }
     res.status(200).json({ success: true, data: category });

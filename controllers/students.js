@@ -43,7 +43,7 @@ exports.getStudents = asyncHandler(async (req, res, next) => {
       });
       if (!student) {
           return next(
-            new ErrorResponse(`No admin with the id of ${req.params.id}`),
+            new ErrorResponse(`No stdent with the id of ${req.params.id}`),
             404
           );
         }

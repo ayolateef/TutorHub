@@ -16,14 +16,9 @@ exports.getReviews = asyncHandler(async (req, res, next) => {
     return res.status(200).json({
       success: true,
       count: reviews.length,
-      data: reviews,
+      data: reviews
     });
-  } else {
-    res.status(200).json({
-      success: true,
-      data: Review,
-    });
-  }
+  } 
 });
 
 // @desc    GET single review
@@ -35,6 +30,7 @@ exports.getReview = asyncHandler(async (req, res, next) => {
   const review = await Review.findById(req.params.id).populate({
     path: "category",
     select: "name, description",
+    strictPopulate: false
   });
   if (!review) {
     return next(
@@ -53,7 +49,6 @@ exports.getReview = asyncHandler(async (req, res, next) => {
 // @access  Private
 exports.addReview = asyncHandler(async (req, res, next) => {
   // Add review to req.body
-  req.body.tutor = req.tutor.id;
   req.body.students = req.students.id;
   // Get the category id submit to tve body
   req.body.category = req.params.categoryId;
@@ -120,7 +115,7 @@ exports.deleteReview = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Not autorize to update review`, 401));
   }
 
-  await review.remove();
+  await review.deleteOne();
 
   res.status(200).json({
     success: true,
