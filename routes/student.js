@@ -1,14 +1,11 @@
 const express = require("express");
 const {
-  getCategories,
-  getCategory,
-  createCategories,
-  updateCategory,
-  deleteCategory,
-} = require("../controllers/categorys");
+  register,getStudent, getStudents
+} = require("../controllers/students");
 
 //Include resource from router
 const subjectRouter = require('./subjects');
+
 
 const router = express.Router();
 
@@ -17,8 +14,9 @@ const router = express.Router();
 // Rer-route into other resource routers
 router.use('/:catergoryId/subjects', subjectRouter);
 
-router.route("/").get(getCategories).post(createCategories);
 
-router.route("/:id").get(getCategory).put(updateCategory).delete(deleteCategory);
+router.route("/").get(getStudents).post(register);
+
+router.route("/:id").get(getStudent);
 
 module.exports = router;
