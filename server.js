@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require('colors');
-var cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const Joi = require('joi');
 const errorHandler = require('./middleware/error')
 
@@ -22,6 +22,7 @@ const admin= require('./routes/admin');
 const auth = require('./routes/auth');
 const tutor = require('./routes/tutor');
 const student = require('./routes/student');
+const review = require('./routes/review');
 
 
 const app = express();
@@ -30,7 +31,7 @@ const app = express();
 app.use(express.json());
 
 //cookie parser
-app.use(cookieParser())
+app.use(cookieParser());
 
 // Dev logging middleware
 if (process.env.NODE_ENV === "development") {
@@ -51,6 +52,7 @@ app.use('/api/v1/category', category);
  app.use('/api/v1/auth', auth);
  app.use('/api/v1/tutor', tutor);
  app.use('/api/v1/student', student);
+ app.use('/api/v1/review', review);
 
 app.use(errorHandler);
 

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const TutorSchema = new mongoose.Schema(
   {
@@ -60,6 +61,9 @@ const TutorSchema = new mongoose.Schema(
 
 // Encrypt password using bcrypt
 TutorSchema.pre("save", async function (next) {
+  if (!this.isModified('password')) {
+    next();
+  }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
@@ -75,4 +79,21 @@ TutorSchema.methods.matchPassword = async function(enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
  
+//Generate hash password token
+TutorSchema.methods.getResetPasswordToken = function() {
+  // Genrate token
+  const resetToken = crypto.randomBytes(20).toString('hex');
+
+  //Hash token and set to resetPasswordToken field
+  this.resetPasswordToken = crypto
+  .createHash('sha256')
+  .update(resetToken)
+  .digest('hex');
+
+  // set expire
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
+};
+
 module.exports = mongoose.model("Tutor", TutorSchema);

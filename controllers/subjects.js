@@ -56,9 +56,9 @@ exports.getSubject = asyncHandler(async (req, res, next) => {
 // @access  Private
 
 exports.addSubject = asyncHandler(async (req, res, next) => {
-  // Get the category id submit to tve body
+    // Get the category id submit to tve body
   req.body.category = req.params.categoryId;
-
+  
   const category = await Category.findById(req.params.categoryId);
 
   // check if it exist
@@ -92,6 +92,17 @@ exports.updateSubject = asyncHandler(async (req, res, next) => {
       404
     );
   }
+
+   // Make sure user is category  owner
+   if (subject.students.toString() !== req.students.id && req.students.role !== "admin") {
+    return next(
+      new ErrorResponse(
+        `Student ${req.students.id} is not authorize to update a subject to this category ${subject._id}`,
+        401
+      )
+    );
+  }
+
   //then update
   subject = await Subject.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -118,11 +129,22 @@ exports.deleteSubject = asyncHandler(async (req, res, next) => {
       404
     );
   }
+
+   // Make sure user is category  owner
+   if (subject.students.toString() !== req.students.id && req.students.role !== "admin") {
+    return next(
+      new ErrorResponse(
+        `Student ${req.students.id} is not authorize to delete a subject to this category ${subject._id}`,
+        401
+      )
+    );
+  }
+
   //then remove
   await subject.remove();
 
   res.status(200).json({
     success: true,
-    data: {}
+    data: {},
   });
 });

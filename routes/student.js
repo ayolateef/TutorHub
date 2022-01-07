@@ -9,7 +9,7 @@ const subjectRouter = require('./subjects');
 
 const router = express.Router();
 
-// const {protect,authorize} = require('../middleware/auth');
+const {protect,authorize} = require('../middleware/auth');
  
 // Rer-route into other resource routers
 router.use('/:catergoryId/subjects', subjectRouter);

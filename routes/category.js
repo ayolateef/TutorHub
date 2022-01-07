@@ -2,23 +2,25 @@ const express = require("express");
 const {
   getCategories,
   getCategory,
-  createCategories,
+  createCategory,
   updateCategory,
   deleteCategory,
 } = require("../controllers/categorys");
 
 //Include resource from router
 const subjectRouter = require('./subjects');
+const reviewRouter = require('./review');
 
 const router = express.Router();
 
-// const {protect,authorize} = require('../middleware/auth');
+ const {protect, authorize} = require('../middleware/auth');
  
 // Rer-route into other resource routers
 router.use('/:catergoryId/subjects', subjectRouter);
+router.use('/:catergoryId/review', reviewRouter);
 
-router.route("/").get(getCategories).post(createCategories);
+router.route("/").get(getCategories).post(protect, authorize('superadmin', 'admin', 'tutor', 'student'),createCategory);
 
-router.route("/:id").get(getCategory).put(updateCategory).delete(deleteCategory);
+router.route("/:id").get(getCategory).put(protect, updateCategory).delete(protect, authorize('superadmin', 'admin'), deleteCategory);
 
 module.exports = router;
