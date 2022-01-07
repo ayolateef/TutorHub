@@ -13,11 +13,12 @@ const sendTokenResponse = (user, statusCode, res) => {
     .cookie('token', token, options)
     .json({
         success: true,
-        token: token
+        token: token,
+        user,
     });
    if (process.env.NODE_ENV === 'production'){
        options.secure = true;
    } 
-}
+};
 
 module.exports = sendTokenResponse;
