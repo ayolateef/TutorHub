@@ -1,10 +1,8 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
-const colors = require('colors');
-var cookieParser = require('cookie-parser')
-const Joi = require('joi');
-const errorHandler = require('./middleware/error')
+const cookieParser = require('cookie-parser');
+const errorHandler = require('./middleware/error');
 
 const connectDB = require("./config/db");
 
@@ -17,11 +15,11 @@ connectDB();
 //Route files
 const category= require('./routes/category');
 const subject= require('./routes/subjects');
-const superadmin= require('./routes/superadmin');
 const admin= require('./routes/admin');
 const auth = require('./routes/auth');
 const tutor = require('./routes/tutor');
 const student = require('./routes/student');
+const review = require('./routes/review');
 
 
 const app = express();
@@ -30,27 +28,21 @@ const app = express();
 app.use(express.json());
 
 //cookie parser
-app.use(cookieParser())
+app.use(cookieParser());
 
 // Dev logging middleware
-if (process.env.NODE_ENV === "development") {
-    app.use(morgan("dev"));
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
   }
-
-//   //file uploading
-// app.use(fileupload());
-
-// // Set static folder
-// app.use(express.static(path.join(__dirname, 'public')))
 
 //Mount routers
 app.use('/api/v1/category', category);
  app.use('/api/v1/subject', subject);
- app.use('/api/v1/superadmin', superadmin);
- app.use('/api/v1/admin', admin);
+ app.use('/api/v1/admins', admin);
  app.use('/api/v1/auth', auth);
  app.use('/api/v1/tutor', tutor);
  app.use('/api/v1/student', student);
+ app.use('/api/v1/review', review);
 
 app.use(errorHandler);
 
@@ -63,7 +55,7 @@ const server = app.listen(
   );
   
   //Handle unhandled promise rejections
-  process.on("unhandledRejection", (err, promise) => {
+  process.on('unhandledRejection', (err, promise) => {
     console.log(`Error: ${err.message}`);
     // Close server & exit process
     server.close(() => process.exit(0));
