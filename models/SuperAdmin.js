@@ -1,6 +1,6 @@
 const crypto = require('crypto');
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Roles = require('../utils/roles');
 
@@ -8,18 +8,18 @@ const SuperAdminSchema = new mongoose.Schema(
     {
         username: {
             type: String,
-            required: [true, "Please type in a username"],
+            required: [true, 'Please type in a username'],
             unique: true,
         },
         name: {
             type: String,
-            required: [true, "Please add a name"],
+            required: [true, 'Please add a name'],
         },
         email: {
             type: String,
             match: [
                 /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                "Please add a valid email",
+                'Please add a valid email',
             ],
             unique: true,
         },
@@ -33,7 +33,7 @@ const SuperAdminSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: [true, "Please password required"],
+            required: [true, 'Please password required'],
             minlength: 6,
             maxlength: 50,
             select: false,
@@ -43,7 +43,7 @@ const SuperAdminSchema = new mongoose.Schema(
     },
     {
         timestamps: true,
-    },
+    }
 );
 
 // Encrypt password using bcrypt
@@ -57,12 +57,16 @@ SuperAdminSchema.pre('save', async function (next) {
 
 // Sign JWT and return
 SuperAdminSchema.methods.getSignedJwtToken = function () {
-    return jwt.sign({
-        id: this._id,
-        role: this.role,
-    }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRE
-    });
+    return jwt.sign(
+        {
+            id: this._id,
+            role: this.role,
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: process.env.JWT_EXPIRE,
+        }
+    );
 };
 //Match user entered password to hashed password in database
 SuperAdminSchema.methods.matchPassword = async function (enteredPassword) {
@@ -75,10 +79,7 @@ SuperAdminSchema.methods.getResetPasswordToken = function () {
     const resetToken = crypto.randomBytes(20).toString('hex');
 
     //Hash token and set to resetPasswordToken field
-    this.resetPasswordToken = crypto
-        .createHash('sha256')
-        .update(resetToken)
-        .digest('hex');
+    this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
     // set expire
     this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;

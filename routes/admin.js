@@ -18,11 +18,8 @@ router.use(protect);
 router.put('/:id/activate', authorize(Roles.SUPER_ADMIN), activateAdmin);
 router.put('/:id/deactivate', authorize(Roles.SUPER_ADMIN), deactivateAdmin);
 
-router 
-.route('/')
-    .get(authorize(Roles.SUPER_ADMIN), getAdmins)
-    .post(authorize(Roles.SUPER_ADMIN), createAdmin);
-            
+router.route('/').get(authorize(Roles.SUPER_ADMIN), getAdmins).post(authorize(Roles.SUPER_ADMIN), createAdmin);
+
 router
     .route('/:id')
     .get(authorize(Roles.SUPER_ADMIN), getAdmin)

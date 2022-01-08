@@ -1,14 +1,17 @@
-const express = require("express");
-const {
-  getSubjects,getSubject,addSubject,updateSubject,deleteSubject} = require('../controllers/subjects');
+const express = require('express');
+const { getSubjects, getSubject, addSubject, updateSubject, deleteSubject } = require('../controllers/subjects');
 
-  const Subject = require('../models/Subject');
+const Subject = require('../models/Subject');
 
-  const router = express.Router({mergeParams: true});
+const router = express.Router({ mergeParams: true });
 
-  const {protect, authorize } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
-  router.route('/').get(getSubjects).post( protect, authorize('superadmin', 'admin'),addSubject);
-  router.route('/:id').get(getSubject).put( protect, updateSubject).delete( protect, authorize('superadmin', 'admin'), deleteSubject);
+router.route('/').get(getSubjects).post(protect, authorize('superadmin', 'admin'), addSubject);
+router
+    .route('/:id')
+    .get(getSubject)
+    .put(protect, updateSubject)
+    .delete(protect, authorize('superadmin', 'admin'), deleteSubject);
 
-  module.exports = router; 
+module.exports = router;

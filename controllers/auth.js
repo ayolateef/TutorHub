@@ -1,34 +1,32 @@
 const Admin = require('../models/Admin');
-const {validateLogin, validateSuperAdminLogin} = require("../validation/authValidation");
+const { validateLogin, validateSuperAdminLogin } = require('../validation/authValidation');
 const sendTokenResponse = require('../middleware/tokenres');
-const asyncHandler = require("../middleware/async");
-const ErrorResponse = require("../utils/errorResponse");
-const Tutor = require("../models/Tutor");
-const SuperAdmin = require("../models/SuperAdmin");
-const Student = require("../models/Student");
-const sendEmail = require("../utils/sendEmail");
-const crypto = require("crypto");
+const asyncHandler = require('../middleware/async');
+const ErrorResponse = require('../utils/errorResponse');
+const Tutor = require('../models/Tutor');
+const SuperAdmin = require('../models/SuperAdmin');
+const Student = require('../models/Student');
+const sendEmail = require('../utils/sendEmail');
+const crypto = require('crypto');
 
 exports.superAdminLogin = asyncHandler(async (req, res, next) => {
     // 1. validate request
     // 400 --> Bad Request
-    const {error} = validateSuperAdminLogin(req.body);
+    const { error } = validateSuperAdminLogin(req.body);
     if (error) return next(new ErrorResponse(error.details[0].message, 400));
 
     // 2. check if the superadmin exists in the database
     const superAdmin = await SuperAdmin.findOne({
-        username: req.body.username
+        username: req.body.username,
     }).select('+password');
-    if (!superAdmin)
-        return next(new ErrorResponse("Invalid username or password", 400));
+    if (!superAdmin) return next(new ErrorResponse('Invalid username or password', 400));
 
     //3. check if the superAdmin password is correct
     const isPassword = await superAdmin.matchPassword(req.body.password);
-    if (!isPassword)
-        return next(new ErrorResponse("Invalid username or password", 400));
+    if (!isPassword) return next(new ErrorResponse('Invalid username or password', 400));
 
     // delete password from user response
-   delete superAdmin.password;
+    delete superAdmin.password;
 
     //4. Generate a token for the super admin
     sendTokenResponse(superAdmin, 200, res);
@@ -38,74 +36,69 @@ exports.superAdminLogin = asyncHandler(async (req, res, next) => {
 exports.logoutSuperadmin = asyncHandler(async (req, res, next) => {
     res.cookie('token', 'none', {
         expires: new Date(Date.now() + 10 * 1000),
-        httpOnly: true
+        httpOnly: true,
     });
 
     res.status(200).json({
         success: true,
-        data: {}
+        data: {},
     });
 });
 
 // @forgot password superadmin
 exports.forgotSuperadminPassword = asyncHandler(async (req, res, next) => {
-    const superadmin = await SuperAdmin.findOne({username: req.body.username});
+    const superadmin = await SuperAdmin.findOne({ username: req.body.username });
 
     if (!superadmin) {
-        return next(new ErrorResponse("There is no superadmin with this username", 404));
+        return next(new ErrorResponse('There is no superadmin with this username', 404));
     }
     //Get reset token
     const resetToken = superadmin.getResetPasswordToken();
 
     console.log(resetToken);
-    await superadmin.save({validateBeforeSave: false});
+    await superadmin.save({ validateBeforeSave: false });
 
     // Create reset url
-    const resetUrl = `${req.protocol}://${req.get(
-        "host"
-    )}/api/v1/auth/resetpassword/${resetToken}`;
+    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/resetpassword/${resetToken}`;
 
     const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
     try {
         await sendEmail({
             email: superadmin.email,
-            subject: "Password reset token",
+            subject: 'Password reset token',
             message,
         });
-        res.status(200).json({success: true, data: "Email sent"});
+        res.status(200).json({ success: true, data: 'Email sent' });
     } catch (err) {
         console.log(err);
         superadmin.resetPasswordToken = undefined;
         superadmin.resetPasswordExpire = undefined;
 
-        await superadmin.save({validateBeforeSave: false});
+        await superadmin.save({ validateBeforeSave: false });
 
-        return next(new ErrorResponse("Email could not be sent", 500));
+        return next(new ErrorResponse('Email could not be sent', 500));
     }
 
     res.status(200).json({
         success: true,
-        data: superadmin
+        data: superadmin,
     });
 });
-//resetPassword SuperAdmin
-// PUT /api/v1/auth/resetpassword/: resettoken
 
+// resetPassword SuperAdmin
+// PUT /api/v1/auth/resetpassword/: resettoken
 exports.resetSuperadminPassword = asyncHandler(async (req, res, next) => {
     // Get hashed token
-    const resetPasswordToken = crypto
-        .createHash("sha256")
-        .update(req.params.resettoken)
-        .digest("hex");
+    const resetPasswordToken = crypto.createHash('sha256').update(req.params.resettoken).digest('hex');
 
     const superadmin = await SuperAdmin.findOne({
         resetPasswordToken,
-        resetPasswordExpire: {$gt: Date.now()},
+        resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!superadmin) {
-        return next(new ErrorResponse("Invalid token", 400));
+        return next(new ErrorResponse('Invalid token', 400));
     }
     // Set new password
     superadmin.password = req.body.password;
@@ -113,7 +106,7 @@ exports.resetSuperadminPassword = asyncHandler(async (req, res, next) => {
     superadmin.resetPasswordExpire = undefined;
     await superadmin.save();
 
-    res.status(200).json({success: true, data: superadmin});
+    res.status(200).json({ success: true, data: superadmin });
 });
 
 // Update superadmin details
@@ -122,17 +115,17 @@ exports.resetSuperadminPassword = asyncHandler(async (req, res, next) => {
 exports.updateSuperadminDetails = asyncHandler(async (req, res, next) => {
     const fieldsToUpdate = {
         username: req.body.username,
-        email: req.body.email
-    }
+        email: req.body.email,
+    };
 
     const superadmin = await SuperAdmin.findByIdAndUpdate(req.superadmin.id, fieldsToUpdate, {
         new: true,
-        runValidators: true
+        runValidators: true,
     });
 
     res.status(200).json({
         success: true,
-        data: superadmin
+        data: superadmin,
     });
 });
 
@@ -146,32 +139,26 @@ exports.getMeSuperadmin = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        data: superadmin
+        data: superadmin,
     });
 });
 
 // Admin Auth
 exports.adminLogin = asyncHandler(async (req, res, next) => {
     // 1. validate request
-    const {error} = validateLogin(req.body);
+    const { error } = validateLogin(req.body);
     if (error) return next(new ErrorResponse(error.details[0].message, 400));
 
     // 2. check if the admin exists in the database
-    const admin = await Admin.findOne({email: req.body.email}).select(
-        "password"
-    );
-    if (!admin) return next(new ErrorResponse("Invalid email or password", 400));
+    const admin = await Admin.findOne({ email: req.body.email }).select('+password');
+    if (!admin) return next(new ErrorResponse('Invalid email or password', 400));
 
     //3. check if the admin password is correct
     const isPassword = await admin.matchPassword(req.body.password);
-    if (!isPassword)
-        return next(new ErrorResponse("Invalid email or password", 400));
+    if (!isPassword) return next(new ErrorResponse('Invalid email or password', 400));
 
     //4. check if the admin account has been deactivated
-    if (!admin.active)
-        return next(
-            new ErrorResponse("Account deactivated, permission denied", 403)
-        );
+    if (!admin.active) return next(new ErrorResponse('Account deactivated, permission denied', 403));
 
     //5. Generate a token for the admin
     sendTokenResponse(admin, 200, res);
@@ -181,53 +168,51 @@ exports.adminLogin = asyncHandler(async (req, res, next) => {
 exports.logoutAdmin = asyncHandler(async (req, res, next) => {
     res.cookie('token', 'none', {
         expires: new Date(Date.now() + 10 * 1000),
-        httpOnly: true
+        httpOnly: true,
     });
     res.status(200).json({
         success: true,
-        data: {}
+        data: {},
     });
 });
 
 // Admn forgot password
 exports.forgotadminPassword = asyncHandler(async (req, res, next) => {
-    const admin = await Admin.findOne({email: req.body.email});
+    const admin = await Admin.findOne({ email: req.body.email });
 
     if (!admin) {
-        return next(new ErrorResponse("There is admin with email", 404));
+        return next(new ErrorResponse('There is admin with email', 404));
     }
     //Get reset token
     const resetToken = admin.getResetPasswordToken();
 
-    await admin.save({validateBeforeSave: false});
+    await admin.save({ validateBeforeSave: false });
 
     // Create reset url
-    const resetUrl = `${req.protocol}://${req.get(
-        "host"
-    )}/api/v1/auth/resetpassword/${resetToken}`;
+    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/resetpassword/${resetToken}`;
 
     const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
     try {
         await sendEmail({
             email: admin.email,
-            subject: "Password reset token",
+            subject: 'Password reset token',
             message,
         });
-        res.status(200).json({success: true, data: "Email sent"});
+        res.status(200).json({ success: true, data: 'Email sent' });
     } catch (err) {
         console.log(err);
         admin.resetPasswordToken = undefined;
         admin.resetPasswordExpire = undefined;
 
-        await admin.save({validateBeforeSave: false});
+        await admin.save({ validateBeforeSave: false });
 
-        return next(new ErrorResponse("Email could not be sent", 500));
+        return next(new ErrorResponse('Email could not be sent', 500));
     }
 
     res.status(200).json({
         success: true,
-        data: admin
+        data: admin,
     });
 });
 
@@ -236,18 +221,15 @@ exports.forgotadminPassword = asyncHandler(async (req, res, next) => {
 
 exports.resetAdminPassword = asyncHandler(async (req, res, next) => {
     // Get hashed token
-    const resetPasswordToken = crypto
-        .createHash("sha256")
-        .update(req.params.resettoken)
-        .digest("hex");
+    const resetPasswordToken = crypto.createHash('sha256').update(req.params.resettoken).digest('hex');
 
     const admin = await Admin.findOne({
         resetPasswordToken,
-        resetPasswordExpire: {$gt: Date.now()},
+        resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!admin) {
-        return next(new ErrorResponse("Invalid token", 400));
+        return next(new ErrorResponse('Invalid token', 400));
     }
     // Set new password
     admin.password = req.body.password;
@@ -255,7 +237,7 @@ exports.resetAdminPassword = asyncHandler(async (req, res, next) => {
     admin.resetPasswordExpire = undefined;
     await admin.save();
 
-    res.status(200).json({success: true, data: admin});
+    res.status(200).json({ success: true, data: admin });
 });
 
 // Update Admin details
@@ -264,17 +246,17 @@ exports.resetAdminPassword = asyncHandler(async (req, res, next) => {
 exports.updateAdminDetails = asyncHandler(async (req, res, next) => {
     const fieldsToUpdate = {
         name: req.body.name,
-        email: req.body.email
-    }
+        email: req.body.email,
+    };
 
     const admin = await Admin.findByIdAndUpdate(req.admin.id, fieldsToUpdate, {
         new: true,
-        runValidators: true
+        runValidators: true,
     });
 
     res.status(200).json({
         success: true,
-        data: admin
+        data: admin,
     });
 });
 // Get current logged in admin
@@ -285,33 +267,27 @@ exports.getMeAdmin = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        data: admin
+        data: admin,
     });
 });
 
-// Tutor Auth 
+// Tutor Auth
 exports.tutorLogin = asyncHandler(async (req, res, next) => {
     // 1. validate request
-    const {error} = validateLogin(req.body);
+    const { error } = validateLogin(req.body);
     if (error) return res.status(400).json(error.details[0].message);
 
     // 2. check if the tutor exists in the database
-    const tutor = await Tutor.findOne({email: req.body.email}).select(
-        "password"
-    );
+    const tutor = await Tutor.findOne({ email: req.body.email }).select('password');
 
-    if (!tutor) return next(new ErrorResponse("Invalid email or password", 400));
+    if (!tutor) return next(new ErrorResponse('Invalid email or password', 400));
 
     //3. check if the admin password is correct
     const isPassword = await tutor.matchPassword(req.body.password);
-    if (!isPassword)
-        return next(new ErrorResponse("Invalid email or password", 400));
+    if (!isPassword) return next(new ErrorResponse('Invalid email or password', 400));
 
     //4. check if the tutor account has been deactivated
-    if (!tutor.active)
-        return next(
-            new ErrorResponse("Account deactivated, permission denied", 403)
-        );
+    if (!tutor.active) return next(new ErrorResponse('Account deactivated, permission denied', 403));
 
     //5. Generate a token for the tutor
     sendTokenResponse(tutor, 200, res);
@@ -321,48 +297,46 @@ exports.tutorLogin = asyncHandler(async (req, res, next) => {
 exports.logoutTutor = asyncHandler(async (req, res, next) => {
     res.cookie('token', 'none', {
         expires: new Date(Date.now() + 10 * 1000),
-        httpOnly: true
+        httpOnly: true,
     });
 
     res.status(200).json({
         success: true,
-        data: {}
+        data: {},
     });
 });
 // tutor forgot password
 exports.forgotTutorPassword = asyncHandler(async (req, res, next) => {
-    const tutor = await Tutor.findOne({email: req.body.email});
+    const tutor = await Tutor.findOne({ email: req.body.email });
 
     if (!tutor) {
-        return next(new ErrorResponse("There is tutor with email", 404));
+        return next(new ErrorResponse('There is tutor with email', 404));
     }
     //Get reset token
     const resetToken = tutor.getResetPasswordToken();
 
-    await tutor.save({validateBeforeSave: false});
+    await tutor.save({ validateBeforeSave: false });
 
     // Create reset url
-    const resetUrl = `${req.protocol}://${req.get(
-        "host"
-    )}/api/v1/auth/resetpassword/${resetToken}`;
+    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/resetpassword/${resetToken}`;
 
     const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
     try {
         await sendEmail({
             email: tutor.email,
-            subject: "Password reset token",
+            subject: 'Password reset token',
             message,
         });
-        res.status(200).json({success: true, data: "Email sent"});
+        res.status(200).json({ success: true, data: 'Email sent' });
     } catch (err) {
         console.log(err);
         tutor.resetPasswordToken = undefined;
         tutor.resetPasswordExpire = undefined;
 
-        await tutor.save({validateBeforeSave: false});
+        await tutor.save({ validateBeforeSave: false });
 
-        return next(new ErrorResponse("Email could not be sent", 500));
+        return next(new ErrorResponse('Email could not be sent', 500));
     }
 
     res.status(200).json({
@@ -376,18 +350,15 @@ exports.forgotTutorPassword = asyncHandler(async (req, res, next) => {
 
 exports.resetTutorPassword = asyncHandler(async (req, res, next) => {
     // Get hashed token
-    const resetPasswordToken = crypto
-        .createHash("sha256")
-        .update(req.params.resettoken)
-        .digest("hex");
+    const resetPasswordToken = crypto.createHash('sha256').update(req.params.resettoken).digest('hex');
 
     const tutor = await Tutor.findOne({
         resetPasswordToken,
-        resetPasswordExpire: {$gt: Date.now()},
+        resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!tutor) {
-        return next(new ErrorResponse("Invalid token", 400));
+        return next(new ErrorResponse('Invalid token', 400));
     }
     // Set new password
     tutor.password = req.body.password;
@@ -395,26 +366,26 @@ exports.resetTutorPassword = asyncHandler(async (req, res, next) => {
     tutor.resetPasswordExpire = undefined;
     await tutor.save();
 
-    res.status(200).json({success: true, data: tutor});
+    res.status(200).json({ success: true, data: tutor });
 });
 
 // Update tutor details
 // PUT /api/v1/auth/updateTutordetails
-// Private 
+// Private
 exports.updateTutorDetails = asyncHandler(async (req, res, next) => {
     const fieldsToUpdate = {
         name: req.body.name,
-        email: req.body.email
-    }
+        email: req.body.email,
+    };
 
     const tutor = await Tutor.findByIdAndUpdate(req.tutor.id, fieldsToUpdate, {
         new: true,
-        runValidators: true
+        runValidators: true,
     });
 
     res.status(200).json({
         success: true,
-        data: tutor
+        data: tutor,
     });
 });
 // Get current logged in user
@@ -425,28 +396,24 @@ exports.getMeTutor = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        data: tutor
+        data: tutor,
     });
 });
 
 // STUDENT AUTH
 exports.studentLogin = asyncHandler(async (req, res, next) => {
     // 1. validate request
-    const {error} = validateLogin(req.body);
+    const { error } = validateLogin(req.body);
     if (error) return res.status(400).json(error.details[0].message);
 
     // 2. check if the student exists in the database
 
-    const student = await Student.findOne({email: req.body.email}).select(
-        "password"
-    );
-    if (!student)
-        return next(new ErrorResponse("Invalid email or password", 400));
+    const student = await Student.findOne({ email: req.body.email }).select('password');
+    if (!student) return next(new ErrorResponse('Invalid email or password', 400));
 
     //3. check if the student password is correct
     const isPassword = await student.matchPassword(req.body.password);
-    if (!isPassword)
-        return next(new ErrorResponse("Invalid email or password", 400));
+    if (!isPassword) return next(new ErrorResponse('Invalid email or password', 400));
 
     //4. Generate a token for the student
     sendTokenResponse(student, 200, res);
@@ -456,48 +423,46 @@ exports.studentLogin = asyncHandler(async (req, res, next) => {
 exports.logoutStudent = asyncHandler(async (req, res, next) => {
     res.cookie('token', 'none', {
         expires: new Date(Date.now() + 10 * 1000),
-        httpOnly: true
+        httpOnly: true,
     });
     res.status(200).json({
         success: true,
-        data: {}
+        data: {},
     });
 });
 
 // Student forgot password
 exports.forgotStudentPassword = asyncHandler(async (req, res, next) => {
-    const student = await Student.findOne({email: req.body.email});
+    const student = await Student.findOne({ email: req.body.email });
 
     if (!student) {
-        return next(new ErrorResponse("There is student with email", 404));
+        return next(new ErrorResponse('There is student with email', 404));
     }
     //Get reset token
     const resetToken = student.getResetPasswordToken();
 
-    await student.save({validateBeforeSave: false});
+    await student.save({ validateBeforeSave: false });
 
     // Create reset url
-    const resetUrl = `${req.protocol}://${req.get(
-        "host"
-    )}/api/v1/auth/resetpassword/${resetToken}`;
+    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/resetpassword/${resetToken}`;
 
     const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
     try {
         await sendEmail({
             email: student.email,
-            subject: "Password reset token",
+            subject: 'Password reset token',
             message,
         });
-        res.status(200).json({success: true, data: "Email sent"});
+        res.status(200).json({ success: true, data: 'Email sent' });
     } catch (err) {
         console.log(err);
         student.resetPasswordToken = undefined;
         student.resetPasswordExpire = undefined;
 
-        await student.save({validateBeforeSave: false});
+        await student.save({ validateBeforeSave: false });
 
-        return next(new ErrorResponse("Email could not be sent", 500));
+        return next(new ErrorResponse('Email could not be sent', 500));
     }
 
     res.status(200).json({
@@ -511,18 +476,15 @@ exports.forgotStudentPassword = asyncHandler(async (req, res, next) => {
 
 exports.resetStudentPassword = asyncHandler(async (req, res, next) => {
     // Get hashed token
-    const resetPasswordToken = crypto
-        .createHash("sha256")
-        .update(req.params.resettoken)
-        .digest("hex");
+    const resetPasswordToken = crypto.createHash('sha256').update(req.params.resettoken).digest('hex');
 
     const student = await Student.findOne({
         resetPasswordToken,
-        resetPasswordExpire: {$gt: Date.now()},
+        resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!student) {
-        return next(new ErrorResponse("Invalid token", 400));
+        return next(new ErrorResponse('Invalid token', 400));
     }
     // Set new password
     student.password = req.body.password;
@@ -530,7 +492,7 @@ exports.resetStudentPassword = asyncHandler(async (req, res, next) => {
     student.resetPasswordExpire = undefined;
     await student.save();
 
-    res.status(200).json({success: true, data: student});
+    res.status(200).json({ success: true, data: student });
 });
 
 // Update student details
@@ -539,17 +501,17 @@ exports.resetStudentPassword = asyncHandler(async (req, res, next) => {
 exports.updateStudentDetails = asyncHandler(async (req, res, next) => {
     const fieldsToUpdate = {
         name: req.body.name,
-        email: req.body.email
-    }
+        email: req.body.email,
+    };
 
     const student = await Student.findByIdAndUpdate(req.student.id, fieldsToUpdate, {
         new: true,
-        runValidators: true
+        runValidators: true,
     });
 
     res.status(200).json({
         success: true,
-        data: student
+        data: student,
     });
 });
 // Get current logged in student
@@ -560,6 +522,6 @@ exports.getMeStudent = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        data: student
+        data: student,
     });
 });

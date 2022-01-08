@@ -16,7 +16,7 @@ exports.createAdmin = asyncHandler(async (req, res, next) => {
 
     const { first_name, last_name, email, username } = req.body;
 
-    let admin = await Admin.findOne({username, email});
+    let admin = await Admin.findOne({ username, email });
     if (admin) return next(new ErrorResponse('Admin exists already', 400));
 
     admin = new Admin({
@@ -34,11 +34,11 @@ exports.createAdmin = asyncHandler(async (req, res, next) => {
 
     // TODO: send token to admin email to reset password
 
-    res.status(201).json({ 
-        success: true, 
+    res.status(201).json({
+        success: true,
         message: 'Admin added successfully',
         data: admin,
-     })
+    });
 });
 
 // @desc    GET all Admins
@@ -48,11 +48,10 @@ exports.getAdmins = asyncHandler(async (req, res, next) => {
     const admins = await Admin.find({});
 
     res.status(200).json({
-        success: true, 
-        count: admins.length, 
-        data: admins
+        success: true,
+        count: admins.length,
+        data: admins,
     });
-
 });
 
 // @desc    GET  admin by id
@@ -60,14 +59,13 @@ exports.getAdmins = asyncHandler(async (req, res, next) => {
 // @access  Private/superadmin
 exports.getAdmin = asyncHandler(async (req, res, next) => {
     const admin = await Admin.findById(req.params.id);
-    if (!admin) return next(new ErrorResponse('Admin not found', 404))
+    if (!admin) return next(new ErrorResponse('Admin not found', 404));
 
     return res.status(200).json({
-        success: true, 
+        success: true,
         message: 'Admin retrieved successfully',
-        data: admin
+        data: admin,
     });
-
 });
 
 // @desc    Deactivate admin
@@ -77,21 +75,24 @@ exports.deactivateAdmin = asyncHandler(async (req, res, next) => {
     let admin = await Admin.findById(req.params.id);
     if (!admin) return next(new ErrorResponse('Admin not found', 404));
 
-    admin = await Admin.findByIdAndUpdate(req.params.id, {
-        $set: {
-            active: false,
+    admin = await Admin.findByIdAndUpdate(
+        req.params.id,
+        {
+            $set: {
+                active: false,
+            },
+        },
+        {
+            new: true,
+            runValidators: false,
         }
-    }, {
-        new: true,
-        runValidators: false,
-    });
+    );
 
     return res.status(200).json({
         success: true,
         message: 'Admin deactivated successfully',
-        data: admin
+        data: admin,
     });
-
 });
 
 // @desc    Activate admin
@@ -101,24 +102,25 @@ exports.activateAdmin = asyncHandler(async (req, res, next) => {
     let admin = await Admin.findById(req.params.id);
     if (!admin) return next(new ErrorResponse('Admin not found', 404));
 
-    admin = await Admin.findByIdAndUpdate(req.params.id, {
-        $set: {
-            active: true,
+    admin = await Admin.findByIdAndUpdate(
+        req.params.id,
+        {
+            $set: {
+                active: true,
+            },
+        },
+        {
+            new: true,
+            runValidators: false,
         }
-    }, {
-        new: true,
-        runValidators: false,
-    });
+    );
 
     return res.status(200).json({
         success: true,
         message: 'Admin activated successfully',
-        data: admin
+        data: admin,
     });
-
 });
-
-
 
 //  @desc    Get single admin
 //   @route   GET /api/v1/admin/:id
@@ -126,20 +128,17 @@ exports.activateAdmin = asyncHandler(async (req, res, next) => {
 
 exports.getAdmin = asyncHandler(async (req, res, next) => {
     const admin = await Admin.findById(req.params.id).populate({
-        path: "subjects",
-        select: "title",
-        strictPopulate: false
+        path: 'subjects',
+        select: 'title',
+        strictPopulate: false,
     });
     if (!admin) {
-        return next(
-            new ErrorResponse(`No admin with the id of ${req.params.id}`),
-            404
-        );
+        return next(new ErrorResponse(`No admin with the id of ${req.params.id}`), 404);
     }
 
     res.status(200).json({
         success: true,
-        data: admin
+        data: admin,
     });
 });
 
@@ -164,5 +163,5 @@ exports.updateAdmin = asyncHandler(async (req, res, next) => {
         success: true,
         message: 'Admin updated successfully',
         data: admin,
-    })
+    });
 });

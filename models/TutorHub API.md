@@ -73,16 +73,16 @@ Sample response
 
 Subject - English /PUT
 
-- \_id = '123456'
-- tutors = ['077337']
+-   \_id = '123456'
+-   tutors = ['077337']
 
 Tutor - Femi - UNREGISTERED
 
-- \_id = '098673'
+-   \_id = '098673'
 
 Tutor - Yemi - REGISTERED
 
-- \_id = '077337'
+-   \_id = '077337'
 
 Tutor User Story
 Tutor can register
@@ -125,5 +125,5 @@ Reviews should also carry id of bookings, it will be used to validate against ad
 Try to understand One to many relationships of databases (MongoDB in this case but pretty much the same across all databases).
 Helpful Links:
 
-- One to Many Relationship in MongoDB NodeJS Example
-- MongoDB Database Relationships
+-   One to Many Relationship in MongoDB NodeJS Example
+-   MongoDB Database Relationships
