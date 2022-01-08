@@ -24,4 +24,11 @@ const SubjectSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
+SubjectSchema.virtual('tutors', {
+    localField: '_id',
+    foreignField: 'subjects',
+    ref: 'Tutor',
+    justOne: false,
+});
+
 module.exports = mongoose.model('Subject', SubjectSchema);

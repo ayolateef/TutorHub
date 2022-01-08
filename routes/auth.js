@@ -5,6 +5,7 @@ const {
     adminLogin,
     tutorLogin,
     studentLogin,
+    registerTutor,
 
     logoutSuperadmin,
     logoutAdmin,
@@ -40,7 +41,8 @@ const { protect } = require('../middleware/auth');
 
 router.post('/super_admin', superAdminLogin);
 router.post('/admin', adminLogin);
-router.post('/tutor', tutorLogin);
+router.post('/tutor/register', registerTutor);
+router.post('/tutor/login', tutorLogin);
 router.post('/student', studentLogin);
 
 router.get('/super_admin', logoutSuperadmin);

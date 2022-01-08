@@ -1,5 +1,5 @@
 const Admin = require('../models/Admin');
-const { validateLogin, validateSuperAdminLogin } = require('../validation/authValidation');
+const { validateLogin, validateSuperAdminLogin, validateTutorRegister } = require('../validation/authValidation');
 const sendTokenResponse = require('../middleware/tokenres');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
@@ -271,15 +271,40 @@ exports.getMeAdmin = asyncHandler(async (req, res, next) => {
     });
 });
 
+// @desc   register tutor
+// @route   POST/api/auth/tutor/register
+// @access  Public
+exports.registerTutor = asyncHandler(async (req, res, next) => {
+    const { error } = validateTutorRegister(req.body);
+    if (error) return next(new ErrorResponse(error.details[0].message, 400));
+
+    const { first_name, last_name, email, password, phone, rate } = req.body;
+
+    let tutor = await Tutor.findOne({ email });
+    if (tutor) return next(new ErrorResponse('Tutor with email exists already', 400));
+
+    tutor = new Tutor({
+        first_name,
+        last_name,
+        password,
+        phone,
+        email,
+        rate,
+    });
+
+    await tutor.save();
+
+    sendTokenResponse(tutor, 201, res);
+});
+
 // Tutor Auth
 exports.tutorLogin = asyncHandler(async (req, res, next) => {
     // 1. validate request
     const { error } = validateLogin(req.body);
-    if (error) return res.status(400).json(error.details[0].message);
+    if (error) return next(new ErrorResponse(error.details[0].message, 400));
 
     // 2. check if the tutor exists in the database
-    const tutor = await Tutor.findOne({ email: req.body.email }).select('password');
-
+    const tutor = await Tutor.findOne({ email: req.body.email }).select('+password');
     if (!tutor) return next(new ErrorResponse('Invalid email or password', 400));
 
     //3. check if the admin password is correct
@@ -305,6 +330,7 @@ exports.logoutTutor = asyncHandler(async (req, res, next) => {
         data: {},
     });
 });
+
 // tutor forgot password
 exports.forgotTutorPassword = asyncHandler(async (req, res, next) => {
     const tutor = await Tutor.findOne({ email: req.body.email });
@@ -388,6 +414,7 @@ exports.updateTutorDetails = asyncHandler(async (req, res, next) => {
         data: tutor,
     });
 });
+
 // Get current logged in user
 //@ riute POST/api/v1/auth/me
 // @access Private
