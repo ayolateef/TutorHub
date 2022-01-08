@@ -1,17 +1,19 @@
 const express = require('express');
 const { getSubjects, getSubject, addSubject, updateSubject, deleteSubject } = require('../controllers/subjects');
-
-const Subject = require('../models/Subject');
+const Roles = require('../utils/roles');
 
 const router = express.Router({ mergeParams: true });
 
 const { protect, authorize } = require('../middleware/auth');
 
-router.route('/').get(getSubjects).post(protect, authorize('superadmin', 'admin'), addSubject);
+router.use(protect);
+
+router.route('/').get(getSubjects).post(authorize(Roles.SUPER_ADMIN, Roles.ADMIN), addSubject);
+
 router
     .route('/:id')
     .get(getSubject)
-    .put(protect, updateSubject)
-    .delete(protect, authorize('superadmin', 'admin'), deleteSubject);
+    .put(authorize(Roles.SUPER_ADMIN, Roles.ADMIN), updateSubject)
+    .delete(authorize(Roles.SUPER_ADMIN, Roles.ADMIN), deleteSubject);
 
 module.exports = router;
