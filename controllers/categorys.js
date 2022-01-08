@@ -7,7 +7,7 @@ const { validateCreateCategory, validateUpdateCategory } = require('../validatio
 // @route   GET/api/v1/categories
 // @access  Public
 exports.getCategories = asyncHandler(async (req, res, next) => {
-    const categories = await Category.find({});
+    const categories = await Category.find({}).populate('subjects').sort('-createdAt');
 
     res.status(200).json({
         success: true,
@@ -23,7 +23,7 @@ exports.getCategories = asyncHandler(async (req, res, next) => {
 
 exports.getCategory = async (req, res, next) => {
     try {
-        const category = await Category.findById(req.params.id);
+        const category = await Category.findById(req.params.id).populate('subjects');
         if (!category) {
             return next(new ErrorResponse(`Category not found with id of ${req.params.id}`, 404));
         }

@@ -9,7 +9,7 @@ const {
 const Roles = require('../utils/roles');
 
 // //Include resource from router
-// const subjectRouter = require('./subjects');
+const subjectRouter = require('./subjects');
 // const reviewRouter = require('./review');
 
 const router = express.Router();
@@ -17,15 +17,12 @@ const router = express.Router();
 const { protect, authorize } = require('../middleware/auth');
 
 // // Rer-route into other resource routers
-// router.use('/:catergoryId/subjects', subjectRouter);
+router.use('/:categoryId/subject', subjectRouter);
 // router.use('/:catergoryId/review', reviewRouter);
 
 router.use(protect);
 
-router
-    .route('/')
-    .get(getCategories)
-    .post(authorize(Roles.SUPER_ADMIN, Roles.ADMIN), createCategory);
+router.route('/').get(getCategories).post(authorize(Roles.SUPER_ADMIN, Roles.ADMIN), createCategory);
 
 router
     .route('/:id')

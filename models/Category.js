@@ -35,6 +35,13 @@ const CategorySchema = new mongoose.Schema(
     }
 );
 
+CategorySchema.virtual('subjects', {
+    ref: 'Subject',
+    localField: '_id',
+    foreignField: 'category',
+    justOne: false,
+});
+
 // Create category slug from the name and save
 CategorySchema.pre('save', function (next) {
     this.slug = slugify(this.name, { lower: true });

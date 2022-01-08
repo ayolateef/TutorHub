@@ -9,7 +9,7 @@ const SubjectSchema = new mongoose.Schema(
         },
         description: {
             type: String,
-            required: [true, 'Please add a description'],
+            required: false,
         },
         duration: {
             type: Number,
@@ -20,18 +20,6 @@ const SubjectSchema = new mongoose.Schema(
             ref: 'Category',
             required: true,
         },
-        student: {
-            type: mongoose.Schema.ObjectId,
-            ref: 'Student',
-            required: true,
-        },
-        tutors: [
-            {
-                type: mongoose.Schema.ObjectId,
-                ref: 'Tutor',
-                required: true,
-            },
-        ],
     },
     { timestamps: true }
 );
