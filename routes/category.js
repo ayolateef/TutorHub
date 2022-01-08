@@ -1,26 +1,36 @@
-const express = require("express");
+const express = require('express');
 const {
-  getCategories,
-  getCategory,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} = require("../controllers/categorys");
+    getCategories,
+    getCategory,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+} = require('../controllers/categorys');
+const Roles = require('../utils/roles');
 
-//Include resource from router
-const subjectRouter = require('./subjects');
-const reviewRouter = require('./review');
+// //Include resource from router
+// const subjectRouter = require('./subjects');
+// const reviewRouter = require('./review');
 
 const router = express.Router();
 
- const {protect, authorize} = require('../middleware/auth');
- 
-// Rer-route into other resource routers
-router.use('/:catergoryId/subjects', subjectRouter);
-router.use('/:catergoryId/review', reviewRouter);
+const { protect, authorize } = require('../middleware/auth');
 
-router.route("/").get(getCategories).post(protect, authorize('superadmin', 'admin', 'tutor', 'student'),createCategory);
+// // Rer-route into other resource routers
+// router.use('/:catergoryId/subjects', subjectRouter);
+// router.use('/:catergoryId/review', reviewRouter);
 
-router.route("/:id").get(getCategory).put(protect, updateCategory).delete(protect, authorize('superadmin', 'admin'), deleteCategory);
+router.use(protect);
+
+router
+    .route('/')
+    .get(getCategories)
+    .post(authorize(Roles.SUPER_ADMIN, Roles.ADMIN), createCategory);
+
+router
+    .route('/:id')
+    .get(getCategory)
+    .put(authorize(Roles.SUPER_ADMIN, Roles.ADMIN), updateCategory)
+    .delete(authorize(Roles.SUPER_ADMIN, Roles.ADMIN), deleteCategory);
 
 module.exports = router;

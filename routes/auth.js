@@ -29,13 +29,12 @@ const {
     getMeSuperadmin,
     getMeAdmin,
     getMeTutor,
-    getMeStudent
-
+    getMeStudent,
 } = require('../controllers/auth');
 
 const router = express.Router();
 
-const {protect} = require('../middleware/auth')
+const { protect } = require('../middleware/auth');
 
 //router.route("/").post(protect, authorize(superadmin),createSuperadmin).post('/login', authorize(superadmin),login);
 
@@ -68,6 +67,5 @@ router.get('/super_admin/me', protect, getMeSuperadmin);
 router.get('/admin/me', protect, getMeAdmin);
 router.get('/tutor/me', protect, getMeTutor);
 router.get('/student/me', protect, getMeStudent);
-
 
 module.exports = router;
