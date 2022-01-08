@@ -1,14 +1,18 @@
 const mongoose = require('mongoose');
-const Joi = require('joi');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const Roles = require('../utils/roles');
 
 const TutorSchema = new mongoose.Schema(
     {
-        name: {
+        first_name: {
             type: String,
-            required: [true, 'Please add a name'],
+            required: [true, 'Please add a first name'],
+        },
+        last_name: {
+            type: String,
+            required: [true, 'Please add a last name'],
         },
         email: {
             type: String,
@@ -18,11 +22,22 @@ const TutorSchema = new mongoose.Schema(
             ],
             unique: true,
         },
+        phone: {
+            type: String,
+            required: false,
+        },
+        rate: {
+            type: Number,
+            required: true,
+        },
         role: {
             type: String,
-            default: 'Tutor',
+            default: Roles.TUTOR,
         },
-        active: { type: Boolean, defaultValue: true },
+        active: {
+            type: Boolean,
+            default: true,
+        },
         password: {
             type: String,
             required: [true, 'Please password required'],
@@ -32,29 +47,15 @@ const TutorSchema = new mongoose.Schema(
         },
         resetPasswordToken: String,
         resetPasswordExpire: Date,
+        subjects: [
+            {
+                type: mongoose.Schema.ObjectId,
+                ref: 'Subject',
+            },
+        ],
     },
     {
         timestamps: true,
-    },
-    {
-        subject: {
-            type: mongoose.Schema.ObjectId,
-            ref: 'Subject',
-            required: true,
-        },
-        category: {
-            type: mongoose.Schema.ObjectId,
-            ref: 'Category',
-            required: true,
-        },
-    },
-    function validateTutor(tutor) {
-        const schema = {
-            name: Joi.string().min(5).max(50).required(),
-            email: Joi.string().min(5).max(255).required().email(),
-            password: Joi.string().min(5).max(255).required(),
-        };
-        return Joi.validate(tutor, schema);
     }
 );
 

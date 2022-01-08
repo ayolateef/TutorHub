@@ -37,10 +37,15 @@ exports.getSubjects = asyncHandler(async (req, res, next) => {
 // @access  Public
 
 exports.getSubject = asyncHandler(async (req, res, next) => {
-    const subject = await Subject.findById(req.params.id).populate({
-        path: 'category',
-        select: 'name description',
-    });
+    const subject = await Subject.findById(req.params.id)
+        .populate({
+            path: 'category',
+            select: 'name description',
+        })
+        .populate({
+            path: 'tutors',
+            select: 'first_name last_name email phone',
+        });
     if (!subject) {
         return next(new ErrorResponse(`No subject with the id of ${req.params.id}`), 404);
     }
